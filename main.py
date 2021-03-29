@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 
 
 app = Flask(__name__)
@@ -7,12 +7,12 @@ app = Flask(__name__)
 @app.route('/')
 def hello():
     """Return a friendly HTTP greeting."""
-    return 'Good Afternoon, Aniruddha!!!'
+    return jsonify({"data": "Good Afternoon, Aniruddha!!!"})
 
 @app.route('/stations')
 def getStations():
     """Return a friendly HTTP greeting."""
-    return 'Here are the requested stations...'
+    return jsonify({"stations": "Here are the requested stations..."})
 
 
 if __name__ == '__main__':
