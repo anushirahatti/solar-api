@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 
 app = Flask(__name__)
@@ -9,10 +9,13 @@ def hello():
     """Return a friendly HTTP greeting."""
     return jsonify({"data": "Good Afternoon, Aniruddha!!!"})
 
-@app.route('/stations')
+@app.route('/stations', methods=['GET', 'POST'])
 def getStations():
-    """Return a friendly HTTP greeting."""
-    return jsonify({"stations": "Here are the requested stations..."})
+    if request.method == 'GET':
+        data = {"stations": "Here are the requested stations..."}
+        return jsonify({"data": data}), 201
+    else:
+        return jsonify({"data": "Data Uploaded"})
 
 
 if __name__ == '__main__':
