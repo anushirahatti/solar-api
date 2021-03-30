@@ -34,7 +34,7 @@ def hello():
     print(r)
 
 
-    return jsonify({"data": "Good Afternoon, Aniruddha!!!"})
+    return jsonify({"data": type(r)})
 
 @app.route('/stations', methods=['GET', 'POST'])
 def getStations():
