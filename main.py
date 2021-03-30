@@ -30,11 +30,8 @@ def hello():
     
     r = requests.get(url, headers=headers)
 
-    print(type(r.text))
-    print(r.text)
 
-
-    return jsonify({"data": r.text})
+    return r.json()
 
 @app.route('/stations', methods=['GET', 'POST'])
 def getStations():
