@@ -6,6 +6,7 @@ import os
 import requests
 import json
 import uuid
+from opencage.geocoder import OpenCageGeocode
 
 
 # Initialize Flask app
@@ -65,29 +66,44 @@ def getStations():
         lng = '-122.1549'
         print(lng)
         #start = request.get_json().get('start')
-        #print(start)
+        start = '1970-10-03'
+        print(start)
         #end = request.get_json().get('end')
-        #print(end)
+        end = '2015-09-10'
+        print(end)
 
-        # convert latitude and longitude to FIPS to set locationid for filtering stations
-        url = "https://api.opencagedata.com/geocode/v1/json"
+        # convert latitude and longitude to FIPS to set locationid for filtering stations        
         key = "17953106d8134918b9ffdd624065750a"
-        language = "en"
-        coordinates = "{}, {}".format(lat, lng)
+        geocoder = OpenCageGeocode(key)
+        results = geocoder.reverse_geocode(lat, lng)
+        fips = results[0]['annotations']['FIPS']['county']
+
+        
+        # set the user parameters to NCDC URL and get filtered results
+        url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=2&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
+        #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/COOP:010125"
+        token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
         headers = {
-            'key': key,
-            'language': language,
-            'coordinates': coordinates,
+            'token': token,
             'Content-Type': 'application/json; charset=utf-8'
         }
     
         response = requests.get(url, headers=headers).text
         response_info = json.loads(response)
 
+        # Initialize Firestore DB
+        cred = credentials.Certificate('key.json')
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+
+        # store retrieved data in firestore
+        for result in response_info['results']:
+            doc_id = str(uuid.uuid4().hex)
+            db.collection(u'stations').document(u'{}'.format(doc_id)).set(result)        
 
 
-        data = response_info['results']['FIPS']['county']
-        return jsonify({"FIPS": data}), 201
+        return response_info['metadata'], 201
+
     else:
         return jsonify({"data": "Data Uploaded"})
 
