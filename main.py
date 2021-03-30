@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, request
-#import firebase_admin
-#from firebase_admin import credentials
-#from firebase_admin import firestore
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 import os
 import requests
 import json
+import uuid
 
 
 # Initialize Flask app
@@ -20,25 +21,73 @@ app = Flask(__name__)
 @app.route('/')
 def hello():
     """Return a friendly HTTP greeting."""
+    return "<h1><center>Welcome to Solar App API!</center></h1>"
 
-    url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/"
+
+
+@app.route('/populate')
+def populate():
+
+    url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000"
     token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
     headers = {
         'token': token,
         'Content-Type': 'application/json; charset=utf-8'
     }
     
-    r = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers).text
+    response_info = json.loads(response)
+
+    # Initialize Firestore DB
+    cred = credentials.Certificate('key.json')
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+
+    for result in response_info['results']:
+        doc_id = str(uuid.uuid4().hex)
+        db.collection(u'stations').document(u'{}'.format(doc_id)).set(result)
 
 
-    return r.json()
+    return response_info['metadata']
+
+
 
 @app.route('/stations', methods=['GET', 'POST'])
 def getStations():
 
     if request.method == 'GET':
-        data = {"stations": "Here are the requested stations..."}
-        return jsonify({"data": data}), 201
+
+        # store the request parameters in  variables
+        #lat = request.get_json().get('lat')
+        lat = '47.59163'
+        print(lat)
+        #lng = request.get_json().get('lng')
+        lng = '-122.1549'
+        print(lng)
+        #start = request.get_json().get('start')
+        #print(start)
+        #end = request.get_json().get('end')
+        #print(end)
+
+        # convert latitude and longitude to FIPS to set locationid for filtering stations
+        url = "https://api.opencagedata.com/geocode/v1/json"
+        key = "17953106d8134918b9ffdd624065750a"
+        language = "en"
+        coordinates = "{}, {}".format(lat, lng)
+        headers = {
+            'key': key,
+            'language': language,
+            'coordinates': coordinates,
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+    
+        response = requests.get(url, headers=headers).text
+        response_info = json.loads(response)
+
+
+
+        data = response_info['results']['FIPS']['county']
+        return jsonify({"FIPS": data}), 201
     else:
         return jsonify({"data": "Data Uploaded"})
 
