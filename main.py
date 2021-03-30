@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
-from firebase_admin import credentials, firestore, initialize_app
+#import firebase_admin
+#from firebase_admin import credentials
+#from firebase_admin import firestore
 import os
 import requests
 import json
@@ -9,9 +11,9 @@ import json
 app = Flask(__name__)
 
 # Initialize Firestore DB
-cred = credentials.Certificate('key.json')
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+#cred = credentials.Certificate('key.json')
+#firebase_admin.initialize_app(cred)
+#db = firestore.client()
 #stations_ref = db.collection('stations')
 
 
