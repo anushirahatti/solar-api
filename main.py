@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, make_response, jsonify, request
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -60,6 +60,8 @@ def getStations():
         end = '2019-09-10'
         print(end)
 
+        response = make_response(jsonify({"Info": 'Initial'}), 200)
+
 
         # convert latitude and longitude to FIPS to set locationid for filtering stations        
         key = "17953106d8134918b9ffdd624065750a"
@@ -70,7 +72,11 @@ def getStations():
         if country_code == 'us':
             fips = results[0]['annotations']['FIPS']['county']
         else:
-            return (jsonify({"Info": "Not a location within United States. Please choose location within the United States."}), 200, headers)
+            response = make_response(jsonify({"Info": "Not a location within United States. Please choose location within the United States."}), 200)
+            # add the CORS header
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.content_type = "application/json"
+            return response
 
 
         # Initialize Firestore DB if not already initialized
@@ -105,7 +111,11 @@ def getStations():
             response_info = json.loads(response)
             
             if len(response_info) == 0:
-                return (jsonify({"Info": "No results available to match the query. Please submit modified query."}), 200, headers)
+                response = make_response(jsonify({"Info": "No results available to match the query. Please submit modified query."}), 200)
+                # add the CORS header
+                response.headers['Access-Control-Allow-Origin'] = '*'
+                response.content_type = "application/json"
+                return response
 
             # store retrieved data in firestore
             # create a new doc entry for the user query in firebase
@@ -125,7 +135,11 @@ def getStations():
                 u'resultsCount': response_info['metadata']['resultset']['count'] 
             })
 
-            return (jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 200, headers)
+            response = make_response(jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 200)
+            # add the CORS header
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.content_type = "application/json"
+            return response
 
 
         # if data exists, return the query results from database    
@@ -142,13 +156,28 @@ def getStations():
             doc = doc_rf.get()
             if doc.exists:
                 response_info = doc.to_dict()
-                return (jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200, headers)
+                response = make_response(jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200)
+                # add the CORS header
+                response.headers['Access-Control-Allow-Origin'] = '*'
+                response.content_type = "application/json"
+                return response
+                #return (jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200, headers)
             else:
-                return (jsonify({"results": [], "count": 0}), 200, headers)
+                response = make_response(jsonify({"results": [], "count": 0}), 200)
+                # add the CORS header
+                response.headers['Access-Control-Allow-Origin'] = '*'
+                response.content_type = "application/json"
+                return response
+                #return (jsonify({"results": [], "count": 0}), 200, headers)
  
 
     else:
-        return (jsonify({"data": "Data Uploaded"}), 200, headers)
+        response = make_response(jsonify({"data": "Data Uploaded"}), 200)
+        # add the CORS header
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.content_type = "application/json"
+        return response
+        #return (jsonify({"data": "Data Uploaded"}), 200, headers)
 
 
 # Create a Product
