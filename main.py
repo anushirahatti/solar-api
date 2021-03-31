@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-import os
 import requests
 import json
 import uuid
@@ -194,4 +193,4 @@ def delete_product(id):
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=False)
