@@ -6,7 +6,7 @@ import requests
 import json
 import uuid
 from opencage.geocoder import OpenCageGeocode
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 
 # Initialize Flask app
@@ -18,6 +18,12 @@ app = Flask(__name__)
 #db = firestore.client()
 #stations_ref = db.collection('stations')
 
+api_cors_config = {
+  "origins": ["*"],
+  "methods": ["OPTIONS", "GET", "POST"],
+  "allow_headers": ["Authorization", "Content-Type"]
+}
+
 
 @app.route('/')
 def hello():
@@ -27,24 +33,10 @@ def hello():
 
 
 @app.route('/stations', methods=['POST'])
+@cross_origin(**api_cors_config)
 def getStations():
 
     if request.method == 'POST' :
-
-        if request.method == 'OPTIONS':
-
-            # Allows GET requests from any origin with the Content-Type
-            # header and caches preflight response for an 3600s
-            headers = {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Max-Age': '8600',
-            }
-            return ('', 204, headers)
-
-        # Set CORS headers for the main request
-        headers = {'Access-Control-Allow-Origin': '*'}
 
         # store the request parameters in  variables
         lat = request.get_json().get('lat')
@@ -72,11 +64,7 @@ def getStations():
         if country_code == 'us':
             fips = results[0]['annotations']['FIPS']['county']
         else:
-            response = make_response(jsonify({"Info": "Not a location within United States. Please choose location within the United States."}), 200)
-            # add the CORS header
-            response.headers['Access-Control-Allow-Origin'] = '*'
-            response.content_type = "application/json"
-            return response
+            return jsonify({"Info": "Not a location within United States. Please choose location within the United States."}), 200
 
 
         # Initialize Firestore DB if not already initialized
@@ -111,11 +99,7 @@ def getStations():
             response_info = json.loads(response)
             
             if len(response_info) == 0:
-                response = make_response(jsonify({"Info": "No results available to match the query. Please submit modified query."}), 200)
-                # add the CORS header
-                response.headers['Access-Control-Allow-Origin'] = '*'
-                response.content_type = "application/json"
-                return response
+                return jsonify({"Info": "No results available to match the query. Please submit modified query."}), 200
 
             # store retrieved data in firestore
             # create a new doc entry for the user query in firebase
@@ -135,11 +119,7 @@ def getStations():
                 u'resultsCount': response_info['metadata']['resultset']['count'] 
             })
 
-            response = make_response(jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 200)
-            # add the CORS header
-            response.headers['Access-Control-Allow-Origin'] = '*'
-            response.content_type = "application/json"
-            return response
+            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 200
 
 
         # if data exists, return the query results from database    
@@ -156,28 +136,13 @@ def getStations():
             doc = doc_rf.get()
             if doc.exists:
                 response_info = doc.to_dict()
-                response = make_response(jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200)
-                # add the CORS header
-                response.headers['Access-Control-Allow-Origin'] = '*'
-                response.content_type = "application/json"
-                return response
-                #return (jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200, headers)
+                return jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200
             else:
-                response = make_response(jsonify({"results": [], "count": 0}), 200)
-                # add the CORS header
-                response.headers['Access-Control-Allow-Origin'] = '*'
-                response.content_type = "application/json"
-                return response
-                #return (jsonify({"results": [], "count": 0}), 200, headers)
+                return jsonify({"results": [], "count": 0}), 200
  
 
     else:
-        response = make_response(jsonify({"data": "Data Uploaded"}), 200)
-        # add the CORS header
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.content_type = "application/json"
-        return response
-        #return (jsonify({"data": "Data Uploaded"}), 200, headers)
+        return jsonify({"data": "Data Uploaded"}), 200
 
 
 # Create a Product
