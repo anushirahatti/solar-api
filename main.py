@@ -47,17 +47,17 @@ def getStations():
         headers = {'Access-Control-Allow-Origin': '*'}
 
         # store the request parameters in  variables
-        #lat = request.get_json().get('lat')
-        lat = '47.59163'
+        lat = request.get_json().get('lat')
+        #lat = '47.59163'
         print(lat)
-        #lng = request.get_json().get('lng')
-        lng = '-120.1549'
+        lng = request.get_json().get('lng')
+        #lng = '-120.1549'
         print(lng)
-        #start = request.get_json().get('start')
-        start = '2018-10-03'
+        start = request.get_json().get('start')
+        #start = '2018-10-03'
         print(start)
-        #end = request.get_json().get('end')
-        end = '2019-09-10'
+        end = request.get_json().get('end')
+        #end = '2019-09-10'
         print(end)
 
         response = make_response(jsonify({"Info": 'Initial'}), 200)
