@@ -110,7 +110,7 @@ def getStations():
                 u'resultsCount': response_info['metadata']['resultset']['count'] 
             })
 
-            return jsonify({"results": response_info['results']}), 201
+            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 201
 
 
         # if data exists, return the query results from database    
@@ -127,9 +127,9 @@ def getStations():
             doc = doc_rf.get()
             if doc.exists:
                 response_info = doc.to_dict()
-                return jsonify({"results": response_info['results']}), 201
+                return jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 201
             else:
-                return jsonify({"results": []})
+                return jsonify({"results": [], "count": 0})
  
 
     else:
