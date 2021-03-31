@@ -29,7 +29,7 @@ def hello():
 @app.route('/stations', methods=['GET', 'POST'])
 def getStations():
 
-    if request.method == 'GET':
+    if request.method == 'POST' :
 
         if request.method == 'OPTIONS':
 
