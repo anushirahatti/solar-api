@@ -19,10 +19,12 @@ app = Flask(__name__)
 #stations_ref = db.collection('stations')
 
 api_cors_config = {
-  "origins": ["*"],
+  "origins": ["https://solar-app-mecbn52fuq-uc.a.run.app/"],
   "methods": ["OPTIONS", "GET", "POST"],
   "allow_headers": ["Authorization", "Content-Type"]
 }
+
+CORS(app)
 
 
 @app.route('/')
