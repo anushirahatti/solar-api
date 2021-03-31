@@ -26,7 +26,7 @@ def hello():
 
 
 
-@app.route('/stations', methods=['GET', 'POST'])
+@app.route('/stations', methods=['POST'])
 def getStations():
 
     if request.method == 'POST' :
@@ -39,7 +39,7 @@ def getStations():
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'POST',
                 'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Max-Age': '3600',
+                'Access-Control-Max-Age': '8600',
             }
             return ('', 204, headers)
 
