@@ -5,3 +5,4 @@ pylint
 requests
 uuid
 opencage
+flask-cors
