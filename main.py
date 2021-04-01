@@ -24,7 +24,7 @@ CORS(app)
 @app.route('/')
 def hello():
     """Return a friendly HTTP greeting."""
-    return "<center><h1>Welcome to Solar App API!</h1> <br/><br/> <h3><strong><p>Here are the options:</p> <ul><li>/stations</li></ul></strong></h3></center>"
+    return "<center><h1>Welcome to Solar App API!</h1> <br/><br/> <h3><strong><p>Here are the options:</p> <ul><li>/stations</li><li>/data</li></ul></strong></h3></center>"
 
 
 
