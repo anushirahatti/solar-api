@@ -138,7 +138,7 @@ def getStations():
 
 
 
-@app.route('/data', methods=['POST'])
+@app.route('/data', methods=['GET'])
 @cross_origin(**api_cors_config)
 def getdata():
 
