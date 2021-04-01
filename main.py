@@ -132,7 +132,7 @@ def getStations():
                 response_info = doc.to_dict()
                 return jsonify({"results": response_info['results'], "count": response_info['resultsCount'], "doc_id": docId}), 200
             else:
-                return jsonify({"results": [], "count": 0, "docId": ""}), 200
+                return jsonify({"results": [], "count": 0, "doc_id": ""}), 200
 
 
 
