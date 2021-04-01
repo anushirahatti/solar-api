@@ -144,14 +144,14 @@ def getdata():
 
         # store the request parameters in  variables
 
-        docId = request.get_json().get('doc_id')
-        #docId = '10eac2ae314442fd8ce6aafc7af0556b'
+        #docId = request.get_json().get('doc_id')
+        docId = '10eac2ae314442fd8ce6aafc7af0556b'
         print(docId)
-        sid = request.get_json().get('stationid')
-        #sid = 'GHCND:USR0000WCAR'
+        #sid = request.get_json().get('stationid')
+        sid = 'GHCND:USR0000WCAR'
         print(sid)
-        fips = request.get_json().get('fips')
-        #fips = '53'
+        #fips = request.get_json().get('fips')
+        fips = '53'
         print(fips)
         #start = request.get_json().get('start')
         start = '2010-06-05'
