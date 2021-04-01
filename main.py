@@ -28,7 +28,7 @@ def hello():
 
 
 
-@app.route('/stations', methods=['GET'])
+@app.route('/stations', methods=['POST'])
 @cross_origin(**api_cors_config)
 def getStations():
 
@@ -134,7 +134,7 @@ def getStations():
 
 
 
-@app.route('/data', methods=['GET'])
+@app.route('/data', methods=['POST'])
 @cross_origin(**api_cors_config)
 def getdata():
 
