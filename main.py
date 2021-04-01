@@ -113,7 +113,7 @@ def getStations():
                 u'resultsCount': response_info['metadata']['resultset']['count'] 
             })
 
-            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count'], "doc_id": doc_id}), 200
+            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count'], "doc_id": doc_id, "fips": fips}), 200
 
 
         # if data exists, return the query results from database    
@@ -130,9 +130,9 @@ def getStations():
             doc = doc_rf.get()
             if doc.exists:
                 response_info = doc.to_dict()
-                return jsonify({"results": response_info['results'], "count": response_info['resultsCount'], "doc_id": docId}), 200
+                return jsonify({"results": response_info['results'], "count": response_info['resultsCount'], "doc_id": docId, "fips": response_info['fips']}), 200
             else:
-                return jsonify({"results": [], "count": 0, "doc_id": ""}), 200
+                return jsonify({"results": [], "count": 0, "doc_id": "", "fips": ""}), 200
 
 
 
@@ -144,13 +144,14 @@ def getdata():
 
         # store the request parameters in  variables
 
-        #docId = request.get_json().get('doc_id')
-        docId = '10eac2ae314442fd8ce6aafc7af0556b'
+        docId = request.get_json().get('doc_id')
+        #docId = '10eac2ae314442fd8ce6aafc7af0556b'
         print(docId)
-        #sid = request.get_json().get('stationid')
-        sid = 'GHCND:USR0000WCAR'
+        sid = request.get_json().get('stationid')
+        #sid = 'GHCND:USR0000WCAR'
         print(sid)
-        fips = '53'
+        fips = request.get_json().get('fips')
+        #fips = '53'
         print(fips)
         #start = request.get_json().get('start')
         start = '2010-06-05'
