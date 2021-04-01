@@ -11,7 +11,7 @@ from flask_cors import CORS, cross_origin
 
 # Initialize Flask app
 app = Flask(__name__)
-
+# securing the Backend API by allowing ONLY our Frontend application URL to access the API. 
 api_cors_config = {
   "origins": ["https://solar-app-mecbn52fuq-uc.a.run.app"],
   "methods": ["OPTIONS", "GET", "POST"],
@@ -27,7 +27,7 @@ def hello():
     return "<center><h1>Welcome to Solar App API!</h1> <br/><br/> <h3><strong><p>Here are the options:</p> <ul><li>/stations</li><li>/data</li></ul></strong></h3></center>"
 
 
-
+# /stations - for querying the stations with user search criteria
 @app.route('/stations', methods=['POST'])
 @cross_origin(**api_cors_config)
 def getStations():
@@ -48,7 +48,7 @@ def getStations():
 
 
         # convert latitude and longitude to FIPS to set locationid for filtering stations        
-        key = "17953106d8134918b9ffdd624065750a"
+        key = ""
         geocoder = OpenCageGeocode(key)
         results = geocoder.reverse_geocode(lat, lng)
         country_code = results[0]['components']['country_code']
@@ -82,7 +82,7 @@ def getStations():
             #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
             url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=GHCND&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
 
-            token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
+            token = ""
             
             headers = {
                 'token': token,
@@ -137,7 +137,7 @@ def getStations():
 
 
 
-
+# /data - for pulling the temperature data from the user selected station
 @app.route('/data', methods=['POST'])
 @cross_origin(**api_cors_config)
 def getdata():
@@ -182,7 +182,7 @@ def getdata():
 
             # set the user parameters to NCDC URL and get filtered results
             url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=GHCND&datatypeid=TAVG&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
-            token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
+            token = ""
             headers = {
                 'token': token,
                 'Content-Type': 'application/json; charset=utf-8'
