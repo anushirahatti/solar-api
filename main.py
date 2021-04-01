@@ -33,13 +33,17 @@ def hello():
 def getStations():
 
         # store the request parameters in  variables
-        lat = request.get_json().get('lat')
+        #lat = request.get_json().get('lat')
+        lat = '47.59'
         print(lat)
-        lng = request.get_json().get('lng')
+        #lng = request.get_json().get('lng')
+        lng = '-122.15'
         print(lng)
-        start = request.get_json().get('start')
+        #start = request.get_json().get('start')
+        start = '1990-01-01'
         print(start)
-        end = request.get_json().get('end')
+        #end = request.get_json().get('end')
+        end = '2010-12-31'
         print(end)
 
 
@@ -233,4 +237,4 @@ def getdata():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=False)
+    app.run(host='127.0.0.1', port=8080, debug=True)
