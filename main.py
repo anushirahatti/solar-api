@@ -75,8 +75,9 @@ def getStations():
         if listSize == 0:
 
             # set the user parameters to NCDC URL and get filtered results
-            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
-            
+            #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
+            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=GHCND&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
+
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
             
             headers = {
