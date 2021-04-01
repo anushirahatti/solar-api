@@ -1,4 +1,4 @@
-from flask import Flask, make_response, jsonify, request
+from flask import Flask, jsonify, request
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -11,12 +11,6 @@ from flask_cors import CORS, cross_origin
 
 # Initialize Flask app
 app = Flask(__name__)
-
-# Initialize Firestore DB
-#cred = credentials.Certificate('key.json')
-#firebase_admin.initialize_app(cred)
-#db = firestore.client()
-#stations_ref = db.collection('stations')
 
 api_cors_config = {
   "origins": ["https://solar-app-mecbn52fuq-uc.a.run.app"],
@@ -38,23 +32,15 @@ def hello():
 @cross_origin(**api_cors_config)
 def getStations():
 
-    if request.method == 'POST' :
-
         # store the request parameters in  variables
         lat = request.get_json().get('lat')
-        #lat = '47.59163'
         print(lat)
         lng = request.get_json().get('lng')
-        #lng = '-120.1549'
         print(lng)
         start = request.get_json().get('start')
-        #start = '2018-10-03'
         print(start)
         end = request.get_json().get('end')
-        #end = '2019-09-10'
         print(end)
-
-        response = make_response(jsonify({"Info": 'Initial'}), 200)
 
 
         # convert latitude and longitude to FIPS to set locationid for filtering stations        
@@ -90,7 +76,6 @@ def getStations():
 
             # set the user parameters to NCDC URL and get filtered results
             url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
-            #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/COOP:010125"
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
             headers = {
                 'token': token,
@@ -121,7 +106,7 @@ def getStations():
                 u'resultsCount': response_info['metadata']['resultset']['count'] 
             })
 
-            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 200
+            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count'], "doc_id": doc_id}), 200
 
 
         # if data exists, return the query results from database    
@@ -138,13 +123,107 @@ def getStations():
             doc = doc_rf.get()
             if doc.exists:
                 response_info = doc.to_dict()
+                return jsonify({"results": response_info['results'], "count": response_info['resultsCount'], "doc_id": docId}), 200
+            else:
+                return jsonify({"results": [], "count": 0, "docId": ""}), 200
+
+
+
+
+
+@app.route('/data', methods=['POST'])
+@cross_origin(**api_cors_config)
+def getdata():
+
+        # store the request parameters in  variables
+
+        #docId = request.get_json().get('doc_id')
+        docId = '10eac2ae314442fd8ce6aafc7af0556b'
+        print(docId)
+        #sid = request.get_json().get('stationid')
+        sid = 'GHCND:USR0000WCAR'
+        print(sid)
+        fips = '53'
+        print(fips)
+        #start = request.get_json().get('start')
+        start = '2010-06-05'
+        print(start)
+        #end = request.get_json().get('end')
+        end = '2010-11-08'
+        print(end)
+
+
+        # Initialize Firestore DB if not already initialized
+        cred = credentials.Certificate('key.json')
+
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+        
+        db = firestore.client()
+
+        # construct query to check if the data exists in the database
+        query_ref = db.collection(u'temps').where(u'query_doc', u'==', u'{}'.format(docId))
+        docs = query_ref.stream()
+
+        # check length of docs
+        listSize = len(list(docs))
+        print(listSize)      
+
+        # if data doesn't exist in database, fetch data from API, store in database and return the query results
+        if listSize == 0:
+
+            # set the user parameters to NCDC URL and get filtered results
+            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=GHCND&datatypeid=TAVG&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
+            token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
+            headers = {
+                'token': token,
+                'Content-Type': 'application/json; charset=utf-8'
+            }
+    
+            response = requests.get(url, headers=headers).text
+            response_info = json.loads(response)
+            
+            if len(response_info) == 0:
+                return jsonify({"Info": "No results available to match the query. Please submit modified query."}), 200
+
+            # store retrieved data in firestore
+            # create a new doc entry for the user query in firebase
+            doc_id = str(uuid.uuid4().hex)
+
+            doc_ref = db.collection(u'temps').document(u'{}'.format(doc_id))
+            doc_ref.set({
+                u'id': u'{}'.format(doc_id),
+                u'query_doc': u'{}'.format(docId),
+                u'fips': u'{}'.format(fips),
+                u'startDate': u'{}'.format(start),
+                u'endDate': u'{}'.format(end),
+                u'extent': u'',
+                u'dataCoverage': u'',
+                u'results': response_info['results'],
+                u'resultsCount': response_info['metadata']['resultset']['count'] 
+            })
+
+            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 200
+
+
+        # if data exists, return the query results from database    
+        else: 
+
+            docId = ''
+
+            docs = query_ref.stream()
+            for doc in docs:
+                docId = doc.id
+
+            doc_rf = db.collection(u'temps').document(u'{}'.format(docId))
+
+            doc = doc_rf.get()
+            if doc.exists:
+                response_info = doc.to_dict()
                 return jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200
             else:
                 return jsonify({"results": [], "count": 0}), 200
- 
 
-    else:
-        return jsonify({"data": "Data Uploaded"}), 200
 
 
 
