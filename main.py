@@ -44,7 +44,7 @@ def getStations():
 
 
         # convert latitude and longitude to FIPS to set locationid for filtering stations        
-        key = "YOUR_KEY"
+        key = "17953106d8134918b9ffdd624065750a"
         geocoder = OpenCageGeocode(key)
         results = geocoder.reverse_geocode(lat, lng)
         country_code = results[0]['components']['country_code']
@@ -76,12 +76,9 @@ def getStations():
 
             # set the user parameters to NCDC URL and get filtered results
             url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
-<<<<<<< HEAD
+            
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
-=======
-            #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/COOP:010125"
-            token = "YOUR_TOKEN"
->>>>>>> 411532cb31eaa0e913d5430aa5ab48da2889e225
+            
             headers = {
                 'token': token,
                 'Content-Type': 'application/json; charset=utf-8'
