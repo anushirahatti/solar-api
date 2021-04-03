@@ -11,7 +11,7 @@ from flask_cors import CORS, cross_origin
 
 # Initialize Flask app
 app = Flask(__name__)
-
+# securing the Backend API by allowing ONLY our Frontend application URL to access the API. 
 api_cors_config = {
   "origins": ["https://solar-app-mecbn52fuq-uc.a.run.app"],
   "methods": ["OPTIONS", "GET", "POST"],
@@ -27,7 +27,7 @@ def hello():
     return "<center><h1>Welcome to Solar App API!</h1> <br/><br/> <h3><strong><p>Here are the options:</p> <ul><li>/stations</li><li>/data</li></ul></strong></h3></center>"
 
 
-
+# /stations - for querying the stations with user search criteria
 @app.route('/stations', methods=['POST'])
 @cross_origin(**api_cors_config)
 def getStations():
@@ -137,7 +137,7 @@ def getStations():
 
 
 
-
+# /data - for pulling the temperature data from the user selected station
 @app.route('/data', methods=['POST'])
 @cross_origin(**api_cors_config)
 def getdata():
@@ -182,7 +182,9 @@ def getdata():
 
             # set the user parameters to NCDC URL and get filtered results
             url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
+            
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
+
             headers = {
                 'token': token,
                 'Content-Type': 'application/json; charset=utf-8'
