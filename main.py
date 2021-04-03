@@ -11,12 +11,15 @@ from flask_cors import CORS, cross_origin
 
 # Initialize Flask app
 app = Flask(__name__)
+
 # securing the Backend API by allowing ONLY our Frontend application URL to access the API. 
 api_cors_config = {
-  "origins": ["https://solar-app-mecbn52fuq-uc.a.run.app"],
+  "origins": ["*"],
   "methods": ["OPTIONS", "GET", "POST"],
   "allow_headers": ["Authorization", "Content-Type"]
 }
+
+#"origins": ["https://solar-app-mecbn52fuq-uc.a.run.app"]
 
 CORS(app)
 
