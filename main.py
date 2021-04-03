@@ -181,7 +181,7 @@ def getdata():
         if listSize == 0:
 
             # set the user parameters to NCDC URL and get filtered results
-            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
+            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
             
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
 
