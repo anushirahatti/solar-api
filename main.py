@@ -80,7 +80,7 @@ def getStations():
 
             # set the user parameters to NCDC URL and get filtered results
             #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
-            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=GHCND&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
+            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
 
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
             
@@ -144,20 +144,20 @@ def getdata():
 
         # store the request parameters in  variables
 
-        #docId = request.get_json().get('doc_id')
-        docId = '10eac2ae314442fd8ce6aafc7af0556b'
+        docId = request.get_json().get('doc_id')
+        #docId = '10eac2ae314442fd8ce6aafc7af0556b'
         print(docId)
-        #sid = request.get_json().get('stationid')
-        sid = 'GHCND:USR0000WCAR'
+        sid = request.get_json().get('stationid')
+        #sid = 'GHCND:USR0000WCAR'
         print(sid)
         #fips = request.get_json().get('fips')
         fips = '53'
         print(fips)
-        #start = request.get_json().get('start')
-        start = '2010-06-05'
+        start = request.get_json().get('start')
+        #start = '2010-06-05'
         print(start)
-        #end = request.get_json().get('end')
-        end = '2010-11-08'
+        end = request.get_json().get('end')
+        #end = '2010-11-08'
         print(end)
 
 
@@ -181,7 +181,7 @@ def getdata():
         if listSize == 0:
 
             # set the user parameters to NCDC URL and get filtered results
-            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=GHCND&datatypeid=TAVG&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
+            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
             headers = {
                 'token': token,
