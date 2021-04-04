@@ -14,12 +14,10 @@ app = Flask(__name__)
 
 # securing the Backend API by allowing ONLY our Frontend application URL to access the API. 
 api_cors_config = {
-  "origins": ["*"],
+  "origins": ["https://solar-app-mecbn52fuq-uc.a.run.app"],
   "methods": ["OPTIONS", "GET", "POST"],
   "allow_headers": ["Authorization", "Content-Type"]
 }
-
-#"origins": ["https://solar-app-mecbn52fuq-uc.a.run.app"]
 
 CORS(app)
 
@@ -83,7 +81,7 @@ def getStations():
 
             # set the user parameters to NCDC URL and get filtered results
             #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
-            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}".format(fips)            
+            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)            
 
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
             
@@ -154,7 +152,7 @@ def getdata():
         #sid = 'GHCND:USR0000WCAR'
         print(sid)
         #fips = request.get_json().get('fips')
-        fips = '53'
+        fips = '53033'
         print(fips)
         start = request.get_json().get('start')
         #start = '2010-06-05'
@@ -184,7 +182,8 @@ def getdata():
         if listSize == 0:
 
             # set the user parameters to NCDC URL and get filtered results
-            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
+            url_norm = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=standard&datatypeid=DLY-TAVG-NORMAL&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
+            url_std = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=standard&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)            
             
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
 
@@ -193,10 +192,13 @@ def getdata():
                 'Content-Type': 'application/json; charset=utf-8'
             }
     
-            response = requests.get(url, headers=headers).text
+            response = requests.get(url_norm, headers=headers).text
             response_info = json.loads(response)
+
+            response_std = requests.get(url_std, headers=headers).text
+            response_std_info = json.loads(response_std)
             
-            if len(response_info) == 0:
+            if len(response_info) == 0 and len(response_std_info) == 0:
                 return jsonify({"Info": "No results available to match the query. Please submit modified query."}), 200
 
             # store retrieved data in firestore
@@ -213,10 +215,12 @@ def getdata():
                 u'extent': u'',
                 u'dataCoverage': u'',
                 u'results': response_info['results'],
-                u'resultsCount': response_info['metadata']['resultset']['count'] 
+                u'resultsCount': response_info['metadata']['resultset']['count'],
+                u'results_std': response_std_info['results'],
+                u'resultsCount_std': response_std_info['metadata']['resultset']['count'] 
             })
 
-            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count']}), 200
+            return jsonify({ "results": response_info['results'], "count": response_info['metadata']['resultset']['count'], "results_std": response_std_info['results'], "count_std": response_std_info['metadata']['resultset']['count'] }), 200
 
 
         # if data exists, return the query results from database    
@@ -233,9 +237,9 @@ def getdata():
             doc = doc_rf.get()
             if doc.exists:
                 response_info = doc.to_dict()
-                return jsonify({"results": response_info['results'], "count": response_info['resultsCount']}), 200
+                return jsonify({"results": response_info['results'], "count": response_info['resultsCount'], "results_std": response_info['results_std'], "count_std": response_info['resultsCount_std']}), 200
             else:
-                return jsonify({"results": [], "count": 0}), 200
+                return jsonify({"results": [], "count": 0, "results_std": [], "count_std": 0}), 200
 
 
 
