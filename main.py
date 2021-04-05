@@ -200,7 +200,7 @@ def getdata():
 
             # set the user parameters to NCDC URL and get filtered results
             url_norm = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=standard&datatypeid=DLY-TAVG-NORMAL&startdate={}&enddate={}&stationid={}".format(start, end, sid)
-            url_std = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=metric&datatypeid=DLY-TAVG-STDDEV&startdate={}&enddate={}&stationid={}".format(start, end, sid)            
+            url_std = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=standard&datatypeid=DLY-TAVG-STDDEV&startdate={}&enddate={}&stationid={}".format(start, end, sid)            
             
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
 
