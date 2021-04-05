@@ -6,3 +6,4 @@ requests
 uuid
 opencage
 flask-cors
+turfpy

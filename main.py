@@ -5,8 +5,11 @@ from firebase_admin import firestore
 import requests
 import json
 import uuid
-from opencage.geocoder import OpenCageGeocode
+#from opencage.geocoder import OpenCageGeocode
 from flask_cors import CORS, cross_origin
+from geojson import Feature, Point
+from turfpy.transformation import circle
+from turfpy.measurement import bbox
 
 
 # Initialize Flask app
@@ -46,18 +49,29 @@ def getStations():
         end = request.get_json().get('end')
         #end = '2010-12-31'
         print(end)
+        net = request.get_json().get('net')
+        print(net)        
+
+        # use latitude, longitude and net (in degrees) to generate values for extent
+        center = Feature(geometry=Point((lng, lat)))
+        cc = circle(center, radius=net, steps=10, units='deg')
+        print(json.dumps(cc, indent=4, sort_keys=True))
+        print(bbox(cc))
+        bbox_list = list(bbox(cc))
+        extent = str(bbox_list[1]) + "," + str(bbox_list[0]) + "," + str(bbox_list[3]) + "," + str(bbox_list[2])
+        print(extent) 
 
 
         # convert latitude and longitude to FIPS to set locationid for filtering stations        
-        key = "17953106d8134918b9ffdd624065750a"
-        geocoder = OpenCageGeocode(key)
-        results = geocoder.reverse_geocode(lat, lng)
-        country_code = results[0]['components']['country_code']
-        fips = ''
-        if country_code == 'us':
-            fips = results[0]['annotations']['FIPS']['county']
-        else:
-            return jsonify({"Info": "Not a location within United States. Please choose location within the United States."}), 200
+        #key = "17953106d8134918b9ffdd624065750a"
+        #geocoder = OpenCageGeocode(key)
+        #results = geocoder.reverse_geocode(lat, lng)
+        #country_code = results[0]['components']['country_code']
+        #fips = ''
+        #if country_code == 'us':
+        #    fips = results[0]['annotations']['FIPS']['county']
+        #else:
+        #    return jsonify({"Info": "Not a location within United States. Please choose location within the United States."}), 200
 
 
         # Initialize Firestore DB if not already initialized
@@ -69,7 +83,7 @@ def getStations():
         db = firestore.client()
 
         # construct query to check if the data exists in the database
-        query_ref = db.collection(u'queries').where(u'latitude', u'==', u'{}'.format(lat)).where(u'longitude', u'==', u'{}'.format(lng)).where(u'fips', u'==', u'{}'.format(fips)).where(u'startDate', u'==', u'{}'.format(start)).where(u'endDate', u'==', u'{}'.format(end))
+        query_ref = db.collection(u'queries').where(u'latitude', u'==', u'{}'.format(lat)).where(u'longitude', u'==', u'{}'.format(lng)).where(u'net', u'==', u'{}'.format(net)).where(u'extent', u'==', u'{}'.format(extent)).where(u'startDate', u'==', u'{}'.format(start)).where(u'endDate', u'==', u'{}'.format(end))
         docs = query_ref.stream()
 
         # check length of docs
@@ -81,7 +95,7 @@ def getStations():
 
             # set the user parameters to NCDC URL and get filtered results
             #url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)
-            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}".format(fips, start, end)            
+            url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations?limit=1000&datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&datatypeid=DLY-TAVG-STDDEV&extent={}&startdate={}&enddate={}".format(extent, start, end)            
 
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
             
@@ -105,16 +119,16 @@ def getStations():
                 u'id': u'{}'.format(doc_id),
                 u'latitude': u'{}'.format(lat),
                 u'longitude': u'{}'.format(lng),
-                u'fips': u'{}'.format(fips),
+                u'net': u'{}'.format(net),
                 u'startDate': u'{}'.format(start),
                 u'endDate': u'{}'.format(end),
-                u'extent': u'',
+                u'extent': u'{}'.format(extent),
                 u'dataCoverage': u'',
                 u'results': response_info['results'],
                 u'resultsCount': response_info['metadata']['resultset']['count'] 
             })
 
-            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count'], "doc_id": doc_id, "fips": fips}), 200
+            return jsonify({"results": response_info['results'], "count": response_info['metadata']['resultset']['count'], "doc_id": doc_id, "extent": extent}), 200
 
 
         # if data exists, return the query results from database    
@@ -131,9 +145,9 @@ def getStations():
             doc = doc_rf.get()
             if doc.exists:
                 response_info = doc.to_dict()
-                return jsonify({"results": response_info['results'], "count": response_info['resultsCount'], "doc_id": docId, "fips": response_info['fips']}), 200
+                return jsonify({"results": response_info['results'], "count": response_info['resultsCount'], "doc_id": docId, "extent": response_info['extent']}), 200
             else:
-                return jsonify({"results": [], "count": 0, "doc_id": "", "fips": ""}), 200
+                return jsonify({"results": [], "count": 0, "doc_id": "", "extent": ""}), 200
 
 
 
@@ -151,9 +165,9 @@ def getdata():
         sid = request.get_json().get('stationid')
         #sid = 'GHCND:USR0000WCAR'
         print(sid)
-        #fips = request.get_json().get('fips')
-        fips = '53033'
-        print(fips)
+        extent = request.get_json().get('extent')
+        #fips = '53033'
+        print(extent)
         start = request.get_json().get('start')
         #start = '2010-06-05'
         print(start)
@@ -182,8 +196,8 @@ def getdata():
         if listSize == 0:
 
             # set the user parameters to NCDC URL and get filtered results
-            url_norm = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=standard&datatypeid=DLY-TAVG-NORMAL&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)
-            url_std = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=standard&datatypeid=DLY-TAVG-STDDEV&locationid=FIPS:{}&startdate={}&enddate={}&stationid={}".format(fips, start, end, sid)            
+            url_norm = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=standard&datatypeid=DLY-TAVG-NORMAL&startdate={}&enddate={}&stationid={}".format(start, end, sid)
+            url_std = "https://www.ncdc.noaa.gov/cdo-web/api/v2/data?limit=1000&datasetid=NORMAL_DLY&datacategoryid=TEMP&units=metric&datatypeid=DLY-TAVG-STDDEV&startdate={}&enddate={}&stationid={}".format(start, end, sid)            
             
             token = "ylPeWbpuHSsbXHmtqurCJXfejdryavRe"
 
@@ -209,10 +223,9 @@ def getdata():
             doc_ref.set({
                 u'id': u'{}'.format(doc_id),
                 u'query_doc': u'{}'.format(docId),
-                u'fips': u'{}'.format(fips),
+                u'extent': u'{}'.format(extent),
                 u'startDate': u'{}'.format(start),
                 u'endDate': u'{}'.format(end),
-                u'extent': u'',
                 u'dataCoverage': u'',
                 u'results': response_info['results'],
                 u'resultsCount': response_info['metadata']['resultset']['count'],
