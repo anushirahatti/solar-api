@@ -53,8 +53,11 @@ def getStations():
         print(net)        
 
         # use latitude, longitude and net (in degrees) to generate values for extent
-        center = Feature(geometry=Point((lng, lat)))
-        cc = circle(center, radius=net, steps=10, units='deg')
+        print(float(lat))
+        print(float(lng))
+        print(int(net))        
+        center = Feature(geometry=Point((float(lng), float(lat))))
+        cc = circle(center, radius=int(net), steps=10, units='deg')
         print(json.dumps(cc, indent=4, sort_keys=True))
         print(bbox(cc))
         bbox_list = list(bbox(cc))
