@@ -188,7 +188,7 @@ def getdata():
         db = firestore.client()
 
         # construct query to check if the data exists in the database
-        query_ref = db.collection(u'temps').where(u'query_doc', u'==', u'{}'.format(docId))
+        query_ref = db.collection(u'temps').where(u'query_doc', u'==', u'{}'.format(docId)).where(u'stationid', u'==', u'{}'.format(sid)).where(u'startDate', u'==', u'{}'.format(start)).where(u'endDate', u'==', u'{}'.format(end))
         docs = query_ref.stream()
 
         # check length of docs
@@ -225,6 +225,7 @@ def getdata():
             doc_ref = db.collection(u'temps').document(u'{}'.format(doc_id))
             doc_ref.set({
                 u'id': u'{}'.format(doc_id),
+                u'stationid': u'{}'.format(sid),
                 u'query_doc': u'{}'.format(docId),
                 u'extent': u'{}'.format(extent),
                 u'startDate': u'{}'.format(start),
