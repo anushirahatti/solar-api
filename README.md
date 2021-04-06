@@ -2,7 +2,7 @@
 ### Solar App - Python Backend API using Flask and Firestore
 
 ## options:
-/stations - get filtered list of stations
+/stations - get filtered list of stations<br/>
 /data - get daily average temperature for a given station.
 
 ## api endpoint:
